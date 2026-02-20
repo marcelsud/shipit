@@ -1,0 +1,19 @@
+[Unit]
+Description=Traefik Reverse Proxy
+After=docker.service
+Requires=docker.service
+
+[Service]
+Restart=always
+ExecStartPre=-/usr/bin/docker rm -f traefik
+ExecStart=/usr/bin/docker run --name traefik --rm \
+  -p 80:80 -p 443:443 \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -v /etc/traefik/traefik.toml:/etc/traefik/traefik.toml:ro \
+  -v /etc/traefik/acme.json:/etc/traefik/acme.json \
+  --network traefik \
+  traefik:latest
+ExecStop=/usr/bin/docker stop traefik
+
+[Install]
+WantedBy=multi-user.target

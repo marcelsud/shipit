@@ -1,0 +1,18 @@
+[entryPoints.web]
+  address = ":80"
+
+[entryPoints.websecure]
+  address = ":443"
+
+[providers.docker]
+  endpoint = "unix:///var/run/docker.sock"
+  exposedByDefault = false
+  network = "traefik"
+
+{% if acme_email %}
+[certificatesResolvers.letsencrypt.acme]
+  email = "{{ acme_email }}"
+  storage = "/etc/traefik/acme.json"
+  [certificatesResolvers.letsencrypt.acme.httpChallenge]
+    entryPoint = "web"
+{% endif %}

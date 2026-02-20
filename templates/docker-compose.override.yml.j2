@@ -1,0 +1,44 @@
+networks:
+  traefik:
+    external: true
+
+services:
+  {{ web_service }}:
+{% if web_image %}
+    image: {{ web_image }}
+{% endif %}
+    ports: !reset []
+    networks:
+      - traefik
+      - default
+    env_file:
+      - {{ shared_path }}/.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.{{ app_name }}.rule=Host(`{{ domain }}`)"
+      - "traefik.http.routers.{{ app_name }}.entrypoints=web"
+      - "traefik.http.services.{{ app_name }}.loadbalancer.server.port={{ port }}"
+      - "traefik.http.services.{{ app_name }}.loadbalancer.healthcheck.path={{ health_path }}"
+      - "traefik.http.services.{{ app_name }}.loadbalancer.healthcheck.interval=2s"
+    healthcheck:
+{% if health_cmd %}
+      test: ["CMD-SHELL", "{{ health_cmd }}"]
+{% else %}
+      test: ["CMD-SHELL", "curl -sf http://localhost:{{ port }}{{ health_path }} > /dev/null 2>&1 || wget -qO /dev/null http://localhost:{{ port }}{{ health_path }} 2>&1"]
+{% endif %}
+      interval: {{ health_interval }}s
+      timeout: 5s
+      retries: {{ health_retries }}
+      start_period: 5s
+{% if tls %}
+      - "traefik.http.routers.{{ app_name }}-secure.rule=Host(`{{ domain }}`)"
+      - "traefik.http.routers.{{ app_name }}-secure.entrypoints=websecure"
+      - "traefik.http.routers.{{ app_name }}-secure.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.{{ app_name }}.middlewares={{ app_name }}-redirect"
+      - "traefik.http.middlewares.{{ app_name }}-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.{{ app_name }}-redirect.redirectscheme.permanent=true"
+{% endif %}
+{% for svc in image_services %}
+  {{ svc.name }}:
+    image: {{ svc.image }}
+{% endfor %}

@@ -1,0 +1,25 @@
+[app]
+name = "{{ app_name }}"
+repository = "{{ repository }}"
+branch = "{{ branch }}"
+
+[deploy]
+deploy_to = "/var/deploy"
+keep_releases = 5
+
+[deploy.health_check]
+path = "/health"
+port = 8080
+timeout = 60
+interval = 2
+retries = 15
+
+[stages.production]
+user = "deploy"
+
+[stages.production.traefik]
+domain = "{{ app_name }}.example.com"
+tls = false
+
+[[stages.production.hosts]]
+address = "YOUR_SERVER_IP"
