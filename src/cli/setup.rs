@@ -1,6 +1,7 @@
 use anyhow::{Context, Result};
 
 use crate::config::ShipitConfig;
+use crate::nixos;
 use crate::os::HostOs;
 use crate::output;
 use crate::ssh::SshSession;
@@ -23,7 +24,12 @@ pub async fn run(config: ShipitConfig, stage_name: &str) -> Result<()> {
         let host_os = HostOs::resolve(stage.os.as_deref(), &session).await?;
         output::info(&format!("Detected OS: {:?}", host_os));
 
-        // Step 1: Install Docker if not present
+        // NixOS: apply unified module (Docker + Traefik + WireGuard) before other steps
+        if host_os.needs_unified_module() {
+            nixos::apply_module(&session, user).await?;
+        }
+
+        // Step 1: Install Docker if not present (no-op on NixOS)
         install_docker(&session, host_os).await?;
 
         // Step 2: Add user to docker group

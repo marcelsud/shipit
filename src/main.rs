@@ -5,6 +5,7 @@ mod config;
 mod deploy;
 mod llms;
 mod local;
+mod nixos;
 mod os;
 mod output;
 mod release;

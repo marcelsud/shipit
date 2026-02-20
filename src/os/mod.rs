@@ -45,30 +45,29 @@ impl HostOs {
     pub fn install_docker_cmd(&self) -> &'static str {
         match self {
             HostOs::Ubuntu => "curl -fsSL https://get.docker.com | sh",
-            HostOs::NixOs => concat!(
-                "grep -q 'virtualisation.docker.enable' /etc/nixos/configuration.nix || ",
-                "sed -i '/^}$/i\\  virtualisation.docker.enable = true;' /etc/nixos/configuration.nix && ",
-                "nixos-rebuild switch"
-            ),
+            // On NixOS, Docker is handled by shipit.nix unified module
+            HostOs::NixOs => "true",
         }
     }
 
     pub fn install_wireguard_cmd(&self) -> &'static str {
         match self {
             HostOs::Ubuntu => "apt-get update -qq && apt-get install -y -qq wireguard-tools",
-            HostOs::NixOs => "nix-env -iA nixos.wireguard-tools",
+            // On NixOS, wireguard-tools is handled by shipit.nix unified module
+            HostOs::NixOs => "true",
         }
     }
 
     pub fn add_docker_group_cmd(&self, user: &str) -> String {
         match self {
             HostOs::Ubuntu => format!("usermod -aG docker {}", user),
-            // On NixOS, groups must be declarative (imperative usermod is reset by nixos-rebuild).
-            // Add "docker" to the user's extraGroups in configuration.nix if not already present.
-            HostOs::NixOs => format!(
-                r#"grep -q 'extraGroups.*docker' /etc/nixos/configuration.nix || sed -i '/users.users.{user}/,/}};/ s/extraGroups = \[/extraGroups = [ "docker"/' /etc/nixos/configuration.nix && nixos-rebuild switch"#,
-                user = user
-            ),
+            // On NixOS, docker group is handled by shipit.nix unified module
+            HostOs::NixOs => "true".to_string(),
         }
+    }
+
+    /// Whether this OS uses the unified shipit.nix module for Docker, Traefik, and WireGuard.
+    pub fn needs_unified_module(&self) -> bool {
+        matches!(self, HostOs::NixOs)
     }
 }

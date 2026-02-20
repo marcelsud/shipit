@@ -86,7 +86,7 @@ pub async fn setup(stage: &StageConfig, hosts: &[HostConfig], os_config: Option<
             "Activating WireGuard on {}...",
             hosts[i].address
         ));
-        activate_wireguard(session).await?;
+        activate_wireguard(session, host_os_list[i]).await?;
     }
 
     // Close all sessions
@@ -128,6 +128,11 @@ async fn generate_keypair(session: &SshSession) -> Result<String> {
         output::success("WireGuard keys already exist");
         return Ok(pubkey.trim().to_string());
     }
+
+    session
+        .sudo_exec("mkdir -p /etc/wireguard")
+        .await
+        .context("Failed to create /etc/wireguard")?;
 
     session
         .sudo_exec(
@@ -187,15 +192,26 @@ fn build_wg_config(
     config
 }
 
-async fn activate_wireguard(session: &SshSession) -> Result<()> {
+async fn activate_wireguard(session: &SshSession, host_os: HostOs) -> Result<()> {
     // Stop existing interface if running (ignore errors)
     let _ = session.sudo_exec("wg-quick down wg0 2>/dev/null || true").await;
 
-    // Enable and start
-    session
-        .sudo_exec("systemctl enable wg-quick@wg0 && wg-quick up wg0")
-        .await
-        .context("Failed to activate WireGuard")?;
+    match host_os {
+        HostOs::Ubuntu => {
+            session
+                .sudo_exec("systemctl enable wg-quick@wg0 && wg-quick up wg0")
+                .await
+                .context("Failed to activate WireGuard")?;
+        }
+        HostOs::NixOs => {
+            // On NixOS, wg-quick@.service template doesn't exist.
+            // Just bring the interface up; persistence is handled by the config.
+            session
+                .sudo_exec("wg-quick up wg0")
+                .await
+                .context("Failed to activate WireGuard")?;
+        }
+    }
 
     output::success("WireGuard interface wg0 is up");
     Ok(())
