@@ -1,6 +1,6 @@
 ## Server Setup
 
-`shipit setup -s <stage>` prepares each host in the stage for deployments. It connects via SSH and performs the following steps:
+`shipit setup -s <stage>` prepares each host in the stage for deployments. It connects via SSH (through a proxy/jump host if `proxy` is set in the stage config) and performs the following steps:
 
 ### What it installs
 

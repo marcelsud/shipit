@@ -35,6 +35,8 @@ shipit deploy -s production
 
 Traefik handles routing and TLS automatically via Docker labels.
 
+Supports SSH proxy/jump hosts for deploying to private VMs behind a bastion server.
+
 ## Commands
 
 ### Core

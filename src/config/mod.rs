@@ -109,6 +109,7 @@ pub struct StageConfig {
     pub user: Option<String>,
     pub port: Option<u16>,
     pub os: Option<String>,
+    pub proxy: Option<String>,
     #[serde(default)]
     pub hosts: Vec<HostConfig>,
     #[serde(default)]

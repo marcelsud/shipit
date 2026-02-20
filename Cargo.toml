@@ -1,6 +1,6 @@
 [package]
 name = "shipit"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 description = "Deploy apps to VMs via Docker Compose + Traefik. Inspired by Capistrano."
 license = "MIT"

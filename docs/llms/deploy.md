@@ -19,7 +19,7 @@
 ### The 12 steps
 
 1. **Create release directory** — `mkdir -p /var/deploy/<app>/releases/<timestamp>`
-2. **Push code** — `git push` from local to the bare repo on the remote host
+2. **Push code** — `git push` from local to the bare repo on the remote host (uses `GIT_SSH_COMMAND="ssh -J <proxy>"` when a proxy is configured)
 3. **Checkout code** — `git --work-tree=<release> --git-dir=<repo> checkout -f <branch>`
 4. **Generate override** — Writes `docker-compose.override.yml` with Traefik labels, health check config, and network settings
 5. **Link shared .env** — Symlinks `shared/.env` into the release directory. If using encrypted secrets, decrypts `.age` file and writes `.env` on remote (only if hash changed)
@@ -49,7 +49,7 @@ When `deploy.build = "local"` is set in `shipit.toml`, images are built on the d
 The flow:
 1. `docker compose config --format json` is run locally to discover services with `build:` directives
 2. `COMPOSE_PROJECT_NAME=<app_name> docker compose build` runs locally
-3. All built images are transferred in a single pipe: `docker save img1 img2 ... | ssh -C user@host docker load`
+3. All built images are transferred in a single pipe: `docker save img1 img2 ... | ssh -C [-J proxy] user@host docker load`
 4. The generated `docker-compose.override.yml` includes `image:` directives so compose uses the pre-loaded images instead of trying to build on the remote
 
 No registry setup is required — images are transferred directly over SSH with compression.

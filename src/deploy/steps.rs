@@ -34,16 +34,20 @@ pub fn push_code(ctx: &DeployContext, host: &HostConfig) -> Result<()> {
     let remote_url = format!("ssh://{}@{}{}", user, host.address, repo_path);
     let branch = &ctx.config.app.branch;
 
-    let status = Command::new("git")
-        .args([
-            "push",
-            &remote_url,
-            &format!("HEAD:refs/heads/{}", branch),
-            "--force",
-        ])
-        .current_dir(&ctx.project_root)
-        .status()
-        .context("Failed to run git push")?;
+    let mut cmd = Command::new("git");
+    cmd.args([
+        "push",
+        &remote_url,
+        &format!("HEAD:refs/heads/{}", branch),
+        "--force",
+    ])
+    .current_dir(&ctx.project_root);
+
+    if let Some(proxy) = &ctx.stage.proxy {
+        cmd.env("GIT_SSH_COMMAND", format!("ssh -J {}", proxy));
+    }
+
+    let status = cmd.status().context("Failed to run git push")?;
 
     if !status.success() {
         bail!("git push failed");
@@ -278,6 +282,9 @@ fn build_images_local(ctx: &DeployContext, host: &HostConfig) -> Result<()> {
         .context("Failed to capture docker save stdout")?;
 
     let mut ssh_args = vec!["-C".to_string()];
+    if let Some(proxy) = &ctx.stage.proxy {
+        ssh_args.extend(["-J".to_string(), proxy.clone()]);
+    }
     if let Some(port) = ctx.stage.port {
         ssh_args.extend(["-p".to_string(), port.to_string()]);
     }

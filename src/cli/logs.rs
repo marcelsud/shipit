@@ -16,7 +16,7 @@ pub async fn run(
     let current_path = format!("{}/current", config.app_path());
 
     let host = &stage.hosts[0];
-    let session = SshSession::connect(user, &host.address, stage.port).await?;
+    let session = SshSession::connect(user, &host.address, stage.port, stage.proxy.as_deref()).await?;
 
     if !session.path_exists(&current_path).await? {
         output::error("No current release found. Deploy first.");

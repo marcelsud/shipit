@@ -14,7 +14,7 @@ pub async fn set(config: ShipitConfig, stage_name: &str, pair: &str) -> Result<(
     let env_path = format!("{}/shared/.env", config.app_path());
 
     for host in &stage.hosts {
-        let session = SshSession::connect(user, &host.address, stage.port).await?;
+        let session = SshSession::connect(user, &host.address, stage.port, stage.proxy.as_deref()).await?;
 
         // Remove existing key if present, then append
         session
@@ -38,7 +38,7 @@ pub async fn unset(config: ShipitConfig, stage_name: &str, key: &str) -> Result<
     let env_path = format!("{}/shared/.env", config.app_path());
 
     for host in &stage.hosts {
-        let session = SshSession::connect(user, &host.address, stage.port).await?;
+        let session = SshSession::connect(user, &host.address, stage.port, stage.proxy.as_deref()).await?;
 
         session
             .exec(&format!(
@@ -65,7 +65,7 @@ pub async fn list(config: ShipitConfig, stage_name: &str) -> Result<()> {
     }
 
     let host = &stage.hosts[0];
-    let session = SshSession::connect(user, &host.address, stage.port).await?;
+    let session = SshSession::connect(user, &host.address, stage.port, stage.proxy.as_deref()).await?;
 
     let content = session
         .exec(&format!("cat {} 2>/dev/null || echo ''", env_path))

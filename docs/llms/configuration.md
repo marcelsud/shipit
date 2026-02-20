@@ -43,6 +43,7 @@ Shipit is configured via `shipit.toml` in the project root. The file is divided 
 | `user` | string | `"deploy"` | SSH user |
 | `port` | integer | `22` | SSH port |
 | `os` | string | auto-detect | Host OS override (`"nixos"`, `"ubuntu"`) |
+| `proxy` | string | *none* | SSH proxy/jump host (e.g. `"root@bastion.example.com"`) — maps to `ssh -J` |
 | `hosts` | list | *required* | List of `{ address = "IP" }` entries |
 | `env` | table | `{}` | Environment variables set on remote |
 
@@ -99,6 +100,17 @@ hosts = [
 domain = "myapp.com"
 tls = true
 acme_email = "admin@myapp.com"
+
+[stages.staging]
+user = "root"
+proxy = "root@bastion.example.com"
+hosts = [
+  { address = "172.10.0.160" },
+  { address = "172.10.0.161" },
+]
+
+[stages.staging.traefik]
+domain = "staging.myapp.com"
 
 [accessories.postgres]
 image = "postgres:16"

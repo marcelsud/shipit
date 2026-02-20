@@ -14,12 +14,12 @@ fn container_name(app_name: &str, accessory_name: &str) -> String {
 fn find_ssh_target<'a>(
     config: &'a ShipitConfig,
     accessory_host: &str,
-) -> Option<(&'a str, &'a str, Option<u16>)> {
+) -> Option<(&'a str, &'a str, Option<u16>, Option<&'a str>)> {
     for stage in config.stages.values() {
         let user = stage.user.as_deref().unwrap_or("deploy");
         for host in &stage.hosts {
             if host.address == accessory_host {
-                return Some((user, host.address.as_str(), stage.port));
+                return Some((user, host.address.as_str(), stage.port, stage.proxy.as_deref()));
             }
         }
     }
@@ -37,8 +37,8 @@ async fn connect_to_accessory_host(
     let user = stage.user.as_deref().unwrap_or("deploy");
 
     // First try direct match (accessory host == real host address)
-    if let Some((u, addr, port)) = find_ssh_target(config, accessory_host) {
-        return SshSession::connect(u, addr, port).await;
+    if let Some((u, addr, port, proxy)) = find_ssh_target(config, accessory_host) {
+        return SshSession::connect(u, addr, port, proxy).await;
     }
 
     // If accessory host is a WireGuard IP (10.10.0.x), resolve to real host
@@ -51,7 +51,7 @@ async fn connect_to_accessory_host(
         {
             let host_index = index.saturating_sub(1); // 10.10.0.1 -> index 0
             if let Some(host) = stage.hosts.get(host_index) {
-                return SshSession::connect(user, &host.address, stage.port).await;
+                return SshSession::connect(user, &host.address, stage.port, stage.proxy.as_deref()).await;
             }
         }
     }

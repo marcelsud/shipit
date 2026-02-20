@@ -23,7 +23,7 @@ pub async fn run(
     for host in &stage.hosts {
         output::info(&format!("Rolling back on {}", host.address));
 
-        let session = SshSession::connect(user, &host.address, stage.port).await?;
+        let session = SshSession::connect(user, &host.address, stage.port, stage.proxy.as_deref()).await?;
 
         // Read current lock
         let lock = ShipitLock::read(&session, &app_path)

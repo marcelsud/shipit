@@ -18,7 +18,7 @@ pub async fn run(config: ShipitConfig, stage_name: &str) -> Result<()> {
     for host in &stage.hosts {
         output::info(&format!("Host: {}", host.address));
 
-        let session = SshSession::connect(user, &host.address, stage.port).await?;
+        let session = SshSession::connect(user, &host.address, stage.port, stage.proxy.as_deref()).await?;
 
         let releases_dir = format!("{}/releases", app_path);
 

@@ -42,7 +42,7 @@ async fn deploy_to_host(
 ) -> Result<()> {
     output::info(&format!("Deploying to {}", host.address));
 
-    let session = SshSession::connect(ctx.user(), &host.address, ctx.stage.port)
+    let session = SshSession::connect(ctx.user(), &host.address, ctx.stage.port, ctx.stage.proxy.as_deref())
         .await
         .with_context(|| format!("Failed to connect to {}", host.address))?;
 

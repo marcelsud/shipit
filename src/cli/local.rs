@@ -25,7 +25,7 @@ pub async fn run(
             let user = stage.user.as_deref().unwrap_or("ubuntu");
 
             let session =
-                crate::ssh::SshSession::connect(user, &state.ip, stage.port).await?;
+                crate::ssh::SshSession::connect(user, &state.ip, stage.port, stage.proxy.as_deref()).await?;
 
             // Install Docker
             crate::cli::setup::install_docker_on(&session).await?;

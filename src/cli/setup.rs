@@ -18,7 +18,7 @@ pub async fn run(config: ShipitConfig, stage_name: &str) -> Result<()> {
     for host in &stage.hosts {
         output::info(&format!("Setting up {}", host.address));
 
-        let session = SshSession::connect(user, &host.address, stage.port).await?;
+        let session = SshSession::connect(user, &host.address, stage.port, stage.proxy.as_deref()).await?;
 
         // Detect host OS (config override or auto-detect)
         let host_os = HostOs::resolve(stage.os.as_deref(), &session).await?;

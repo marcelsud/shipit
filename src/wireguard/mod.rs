@@ -30,7 +30,7 @@ pub async fn setup(stage: &StageConfig, hosts: &[HostConfig], os_config: Option<
     // Step 1: Connect to all hosts
     let mut sessions: Vec<SshSession> = Vec::new();
     for host in hosts {
-        let session = SshSession::connect(user, &host.address, stage.port).await?;
+        let session = SshSession::connect(user, &host.address, stage.port, stage.proxy.as_deref()).await?;
         sessions.push(session);
     }
 

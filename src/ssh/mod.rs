@@ -10,8 +10,12 @@ pub struct SshSession {
 }
 
 impl SshSession {
-    pub async fn connect(user: &str, host: &str, port: Option<u16>) -> Result<Self> {
-        debug!("Connecting to {}@{}", user, host);
+    pub async fn connect(user: &str, host: &str, port: Option<u16>, proxy: Option<&str>) -> Result<Self> {
+        if let Some(jump) = proxy {
+            debug!("Connecting to {}@{} via proxy {}", user, host, jump);
+        } else {
+            debug!("Connecting to {}@{}", user, host);
+        }
 
         let mut builder = SessionBuilder::default();
         builder.known_hosts_check(KnownHosts::Accept);
@@ -19,6 +23,10 @@ impl SshSession {
 
         if let Some(port) = port {
             builder.port(port);
+        }
+
+        if let Some(jump) = proxy {
+            builder.jump_hosts([jump]);
         }
 
         let session = builder

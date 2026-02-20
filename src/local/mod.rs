@@ -192,6 +192,7 @@ pub fn local_stage_config(state: &LocalState) -> StageConfig {
         user: Some("ubuntu".to_string()),
         port: None,
         os: None,
+        proxy: None,
         hosts: vec![HostConfig {
             address: state.ip.clone(),
         }],

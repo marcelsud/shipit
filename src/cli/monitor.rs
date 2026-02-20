@@ -401,7 +401,7 @@ pub async fn run(config: ShipitConfig, stage_name: &str, interval: u64) -> Resul
     // Connect SSH sessions
     let mut sessions = Vec::new();
     for host in &stage.hosts {
-        let session = SshSession::connect(user, &host.address, port)
+        let session = SshSession::connect(user, &host.address, port, stage.proxy.as_deref())
             .await
             .with_context(|| format!("Failed to connect to {}", host.address))?;
         sessions.push(session);
