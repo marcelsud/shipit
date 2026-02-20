@@ -27,6 +27,9 @@ pub fn run(action: &LlmsAction) -> Result<()> {
                 print!("{}", llms::full());
             }
         }
+        LlmsAction::Agents => {
+            print!("{}", llms::agents());
+        }
     }
     Ok(())
 }

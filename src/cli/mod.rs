@@ -155,6 +155,8 @@ pub enum LlmsAction {
         #[arg(long)]
         json: bool,
     },
+    /// Generate agent context file (pipe to CLAUDE.md, AGENTS.md, etc.)
+    Agents,
 }
 
 #[derive(Subcommand)]

@@ -1,27 +1,20 @@
 # shipit
 
-Deploy apps to VMs via Docker Compose + Traefik. Inspired by Capistrano.
+As AI keeps getting better, I figured — why not build my own deploy tool?
 
-shipit handles the full deploy lifecycle: git push, Docker Compose build, health checks, release symlinking, and automatic Traefik routing — all over SSH.
+So I did. **shipit** deploys apps to VMs via Docker Compose + Traefik. It does what I need. I open sourced it because why not.
 
-## Installation
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/marcelsud/shipit/main/install.sh | bash
-```
-
-Or download a binary directly from [GitHub Releases](https://github.com/marcelsud/shipit/releases).
+Use it at your own risk.
 
 ## Quick Start
 
 ```bash
-# Initialize a shipit.toml in your project
+# Install
+curl -fsSL https://raw.githubusercontent.com/marcelsud/shipit/main/install.sh | bash
+
+# Init, setup, deploy
 shipit init
-
-# Set up the remote server (installs Docker, Traefik, creates deploy dirs)
 shipit setup -s production
-
-# Deploy your app
 shipit deploy -s production
 ```
 
@@ -33,13 +26,9 @@ shipit deploy -s production
 4. **Symlinks** the new release as current
 5. **Cleans up** old releases
 
-Traefik handles routing and TLS automatically via Docker labels.
-
-Supports SSH proxy/jump hosts for deploying to private VMs behind a bastion server.
+Traefik handles routing and TLS automatically via Docker labels. Supports SSH proxy/jump hosts for bastion setups.
 
 ## Commands
-
-### Core
 
 | Command | Description |
 |---------|-------------|
@@ -48,9 +37,12 @@ Supports SSH proxy/jump hosts for deploying to private VMs behind a bastion serv
 | `shipit deploy -s <stage>` | Deploy the application |
 | `shipit rollback -s <stage>` | Roll back to the previous release |
 | `shipit releases -s <stage>` | List all releases |
-| `shipit logs -s <stage> [service]` | Tail logs from containers (`-f` to follow) |
-| `shipit run -s <stage> -- <cmd>` | Execute a one-off command in the app container |
+| `shipit logs -s <stage> [service]` | Tail container logs (`-f` to follow) |
+| `shipit run -s <stage> -- <cmd>` | Run a one-off command in the app container |
 | `shipit monitor -s <stage>` | Live TUI dashboard (containers, resources, disk) |
+
+<details>
+<summary>Config, Secrets, Accessories & Local Dev</summary>
 
 ### Configuration
 
@@ -89,22 +81,27 @@ Supports SSH proxy/jump hosts for deploying to private VMs behind a bastion serv
 | `shipit local status` | Show local VM status |
 | `shipit local down` | Destroy the local VM |
 
-## Global Options
-
-| Flag | Description |
-|------|-------------|
-| `-c, --config <path>` | Path to `shipit.toml` (default: `./shipit.toml`) |
-| `-v, -vv, -vvv` | Increase verbosity (info, debug, trace) |
+</details>
 
 ## Documentation
 
-See the [docs/](docs/) directory for detailed documentation, or run:
+```bash
+shipit llms index          # Topic index
+shipit llms get <topic>    # Read a specific topic
+shipit llms full           # Everything at once
+```
+
+## AI Agents
+
+Generate a context file for AI coding agents:
 
 ```bash
-shipit llms index    # Documentation index
-shipit llms get <topic>  # Read a specific topic
-shipit llms full     # Full documentation
+shipit llms agents > CLAUDE.md   # For Claude Code
+shipit llms agents > AGENTS.md   # Generic
+shipit llms agents > GEMINI.md   # For Gemini
 ```
+
+Agents can then drill deeper with `shipit llms get <topic>`.
 
 ## License
 

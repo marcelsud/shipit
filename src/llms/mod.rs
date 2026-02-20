@@ -11,6 +11,7 @@ pub struct Topic {
 }
 
 const INDEX_CONTENT: &str = include_str!("../../docs/llms/index.md");
+const AGENTS_PREAMBLE: &str = include_str!("../../docs/llms/agents-preamble.md");
 
 const TOPICS: &[Topic] = &[
     Topic {
@@ -77,6 +78,12 @@ const TOPICS: &[Topic] = &[
 
 pub fn index() -> &'static str {
     INDEX_CONTENT
+}
+
+pub fn agents() -> String {
+    let mut out = String::from(AGENTS_PREAMBLE);
+    out.push_str(INDEX_CONTENT);
+    out
 }
 
 pub fn get(slug: &str) -> Result<&'static Topic> {
