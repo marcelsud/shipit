@@ -27,8 +27,8 @@
 - **Routing**: Traefik reverse proxy with automatic service discovery via Docker labels. TLS via Let's Encrypt.
 - **Secrets**: Age-encrypted `.env` files, decrypted on the server at deploy time.
 - **SSH**: All remote operations happen over SSH. Supports proxy/jump hosts for bastion setups.
+- **Service placement (important)**: Prefer `[accessories.*]` for Postgres/Redis/NATS and other stateful dependencies. Current deploy flow recreates app release containers (`docker compose up -d` for new release, then `docker compose down` old release), so dependencies defined inside the app `docker-compose.yml` can be restarted during deploy.
 
 ## Detailed Documentation
 
 Run `shipit llms get <topic>` for in-depth docs on any of these topics:
-

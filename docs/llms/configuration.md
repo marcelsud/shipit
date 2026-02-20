@@ -61,7 +61,7 @@ Shipit is configured via `shipit.toml` in the project root. The file is divided 
 |-----|------|---------|-------------|
 | `image` | string | *required* | Docker image |
 | `host` | string | *required* | Target host address |
-| `port` | string | *none* | Port mapping (e.g. `"5432:5432"`) |
+| `port` | string | *none* | Port mapping. Use `"5432:5432"` for public bind or `"10.10.0.1:5432:5432"` for WireGuard-only bind |
 | `cmd` | string | *none* | Override container command |
 | `env` | table | `{}` | Environment variables |
 | `volumes` | list | `[]` | Volume mounts |
@@ -115,7 +115,7 @@ domain = "staging.myapp.com"
 [accessories.postgres]
 image = "postgres:16"
 host = "1.2.3.4"
-port = "5432:5432"
+port = "10.10.0.1:5432:5432"
 env = { POSTGRES_PASSWORD = "secret" }
 volumes = ["pgdata:/var/lib/postgresql/data"]
 ```

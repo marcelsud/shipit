@@ -21,7 +21,7 @@
 1. **Create release directory** — `mkdir -p /var/deploy/<app>/releases/<timestamp>`
 2. **Push code** — `git push` from local to the bare repo on the remote host (uses `GIT_SSH_COMMAND="ssh -J <proxy>"` when a proxy is configured)
 3. **Checkout code** — `git --work-tree=<release> --git-dir=<repo> checkout -f <branch>`
-4. **Generate override** — Writes `docker-compose.override.yml` with Traefik labels, health check config, and network settings
+4. **Generate override** — Writes `docker-compose.override.yml` with Traefik labels, health check config, network settings, and `env_file` wiring to the shared `.env`
 5. **Link shared .env** — Symlinks `shared/.env` into the release directory. If using encrypted secrets, decrypts `.age` file and writes `.env` on remote (only if hash changed)
 6. **Build images** — When `build = "remote"` (default): `docker compose build` in the release directory. When `build = "local"`: builds images on the developer's machine, then transfers via `docker save | ssh -C docker load`
 7. **Start new release** — `docker compose up -d` in the release directory
@@ -53,6 +53,15 @@ The flow:
 4. The generated `docker-compose.override.yml` includes `image:` directives so compose uses the pre-loaded images instead of trying to build on the remote
 
 No registry setup is required — images are transferred directly over SSH with compression.
+
+### Override behavior
+
+The generated `docker-compose.override.yml` enforces these defaults for the web service:
+
+- Publishes no direct app ports (`ports: !reset []`) so traffic flows through Traefik.
+- Loads runtime environment via `env_file` from the stage shared path.
+
+For accessories, port exposure is controlled only by each `[accessories.<name>].port` value in `shipit.toml`.
 
 ### Lock file format
 

@@ -10,14 +10,14 @@ Define accessories in `shipit.toml`:
 [accessories.postgres]
 image = "postgres:16"
 host = "1.2.3.4"
-port = "5432:5432"
+port = "10.10.0.1:5432:5432"
 env = { POSTGRES_PASSWORD = "secret", POSTGRES_DB = "myapp" }
 volumes = ["pgdata:/var/lib/postgresql/data"]
 
 [accessories.redis]
 image = "redis:7"
 host = "1.2.3.4"
-port = "6379:6379"
+port = "10.10.0.1:6379:6379"
 ```
 
 ### Commands
@@ -43,6 +43,13 @@ Each accessory runs as a `docker run` container with:
 ### Networking
 
 Accessories join the `traefik` Docker network, so app containers can reach them by container name. For example, your app can connect to PostgreSQL at `myapp-postgres:5432`.
+
+If you set `port`, Docker publishes that port on the host. For private mesh deployments, bind to the WireGuard IP instead of `0.0.0.0`:
+
+- Public bind (internet/LAN reachable): `"5432:5432"`
+- WireGuard-only bind: `"10.10.0.1:5432:5432"`
+
+This keeps accessories reachable to mesh peers while avoiding public exposure on the host's external interface.
 
 ### WireGuard support
 
